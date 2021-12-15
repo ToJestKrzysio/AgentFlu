@@ -9,6 +9,6 @@ class SimulationParameters:
 
 
 class AnimationParameters:
-    NUMBER_OF_FRAMES = 400
-    POPULATION_SIZE = 1000
+    NUMBER_OF_FRAMES = 10
+    POPULATION_SIZE = 100
     INITIAL_SICK = 2

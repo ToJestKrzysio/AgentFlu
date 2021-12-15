@@ -1,29 +1,22 @@
-from collections import Counter
-
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+from matplotlib.widgets import TextBox
 
-from src.parameters import PersonParameters, AnimationParameters
+from src.parameters import AnimationParameters
 from src.simulation import Simulation
 import matplotlib
 
+from src.utils import count_people
+
 matplotlib.use("Qt5Agg")
-
-
-def count_people(colors):
-    counts = Counter(colors)
-    return {
-        "healthy": (counts[PersonParameters.HEALTHY_COLOR], PersonParameters.HEALTHY_COLOR),
-        "sick": (counts[PersonParameters.SICK_COLOR], PersonParameters.SICK_COLOR),
-        "recovered": (counts[PersonParameters.RECOVERED_COLOR], PersonParameters.RECOVERED_COLOR),
-    }
-
 
 simulation = Simulation(AnimationParameters.POPULATION_SIZE,
                         AnimationParameters.INITIAL_SICK,
                         number_of_frames=AnimationParameters.NUMBER_OF_FRAMES)
-fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
+fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
+fig = plt.figure(figsize=(15, 5))
+scatter_axis = fig.axs([0.05, 0.05, 0.90, 0.30])
 
 x, y, c = simulation[0]
 scatter = axs[0].scatter(x=x, y=y, c=c)
@@ -36,6 +29,7 @@ for key, (y, c) in counts.items():
     plots[key] = {"data": [y], "plot": plot}
 
 plt.figlegend()
+axs[2].axis('off')
 
 
 def update_factory(simulation):
@@ -58,5 +52,12 @@ def update_factory(simulation):
 
 
 update = update_factory(simulation)
+
+# animation
 anim = animation.FuncAnimation(fig, update, range(simulation.number_of_frames), interval=15)
+
+# buttons
+ax_button = plt.axes([0.7, 0.5, 0.1, 0.05])
+grid_button = TextBox(ax_button, "xD")
+
 plt.show()
