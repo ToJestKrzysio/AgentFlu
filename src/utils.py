@@ -10,3 +10,15 @@ def count_people(colors):
         "sick": (counts[PersonParameters.SICK_COLOR], PersonParameters.SICK_COLOR),
         "recovered": (counts[PersonParameters.RECOVERED_COLOR], PersonParameters.RECOVERED_COLOR),
     }
+
+
+def get_population_health_status(colors):
+    counts = Counter(colors)
+    return (
+        counts[PersonParameters.HEALTHY_COLOR],
+        counts[PersonParameters.SICK_COLOR],
+        counts[PersonParameters.RECOVERED_COLOR],
+    )
+
+def get_population_health_status_keys():
+    return "healthy", "sick", "recovered"

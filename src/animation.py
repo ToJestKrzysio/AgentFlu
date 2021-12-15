@@ -15,8 +15,6 @@ simulation = Simulation(AnimationParameters.POPULATION_SIZE,
                         AnimationParameters.INITIAL_SICK,
                         number_of_frames=AnimationParameters.NUMBER_OF_FRAMES)
 fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
-fig = plt.figure(figsize=(15, 5))
-scatter_axis = fig.axs([0.05, 0.05, 0.90, 0.30])
 
 x, y, c = simulation[0]
 scatter = axs[0].scatter(x=x, y=y, c=c)

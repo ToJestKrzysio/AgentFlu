@@ -55,25 +55,28 @@ class Layout:
         self.button_15_ax = self.fig.add_axes([self.column_4, self.button_row_5, self.button_width, self.button_height])
         self.button_16_ax = self.fig.add_axes([self.column_4, self.button_row_6, self.button_width, self.button_height])
 
-        # self.button_back_ax.axis("off") # should hide the border
         self.button_back = Button(self.button_back_ax, image=Icons.BACK, label="")
         self.button_play = Button(self.button_play_ax, image=Icons.PLAY, label="")
         self.button_stop = Button(self.button_stop_ax, image=Icons.STOP, label="")
         self.button_next = Button(self.button_next_ax, image=Icons.NEXT, label="")
+        self.button_back_ax.axis("off")  # hide the border
+        self.button_play_ax.axis("off")  # hide the border
+        self.button_stop_ax.axis("off")  # hide the border
+        self.button_next_ax.axis("off")  # hide the border
 
-        self.button_01 = TextBox(self.button_01_ax, "")
-        self.button_02 = TextBox(self.button_02_ax, "")
-        self.button_03 = TextBox(self.button_03_ax, "")
-        self.button_04 = TextBox(self.button_04_ax, "")
-        self.button_05 = TextBox(self.button_05_ax, "")
-        self.button_06 = TextBox(self.button_06_ax, "")
+        self.button_01 = Slider(self.button_01_ax, "Sick ", 1, 10, 1, valstep=1)
+        self.button_02 = Slider(self.button_02_ax, "Recovery ", 0.01, 0.8, 0.05)
+        self.button_03 = Slider(self.button_03_ax, "Transmission ", 0.1, 1.0, 0.5)
+        self.button_04 = Slider(self.button_04_ax, "Contact range ", 0.1, 10, 2, valstep=0.1)
+        self.button_05 = Slider(self.button_05_ax, "Steps ", 10, 400, valstep=10)
+        self.button_06 = Slider(self.button_06_ax, "Population ", 50, 1000, 50, valstep=50)
 
-        self.button_11 = Button(self.button_11_ax, "")
-        self.button_12 = Button(self.button_12_ax, "")
-        self.button_13 = Button(self.button_13_ax, "")
-        self.button_14 = Slider(self.button_14_ax, "", 0, 10, 1)
-        self.button_15 = Slider(self.button_15_ax, "", 0, 10, 1)
-        self.button_16 = Slider(self.button_16_ax, "", 0, 10, 1)
+        self.button_11 = Slider(self.button_11_ax, "IMD ", 0.01, 1, 0.2)  # immunity decrease rate
+        self.button_12 = Slider(self.button_12_ax, "RCI ", 0, 1, 0.5, )  # Recovered Immunity
+        self.button_13 = Button(self.button_13_ax, "Empty")
+        self.button_14 = Button(self.button_14_ax, "Empty")
+        self.button_15 = Button(self.button_15_ax, "Empty")
+        self.button_16 = Button(self.button_16_ax, "Generate New")
 
 
 class Icons:

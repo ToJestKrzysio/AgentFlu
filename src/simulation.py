@@ -15,13 +15,13 @@ class Simulation:
     frames: list[frame]
 
     def __init__(self, population_size: int, initial_sick: int = 1, number_of_frames: int = 30,
-                 person_kwargs: dict = None):
+                 person_kwargs: dict = None, contact_radius: float = 0.005):
         person_kwargs = {} if person_kwargs is None else person_kwargs
         self.frames = []
         self.initial_sick = initial_sick
         self.population_size = population_size
         self.population = [Person(**person_kwargs) for x in range(population_size)]
-        self.contact_radius = SimulationParameters.CONTACT_RADIUS
+        self.contact_radius = contact_radius
         self.squared_contact_radius = self.contact_radius ** 2
         for idx in range(initial_sick):
             self.population[idx].get_sick()
