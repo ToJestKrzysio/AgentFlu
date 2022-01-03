@@ -2,36 +2,44 @@ from src.simulation import Simulation
 import streamlit as st
 import pandas as pd
 import altair as alt
-from typing import Dict, Union
+from typing import Dict, Union, Tuple
+import time
 
-
-
-def get_simulation_params() -> Dict[str, Union[int, float]]:
+def get_simulation_params() -> Tuple[Dict[str, Union[int, float]]]:
     st.subheader("Simulation parameters")
     simulation_params: Dict[str, Union[int, float]] = dict()
-    simulation_params["population_size"] = int(st.number_input("Population", min_value=0, value=50, step=1))
-    simulation_params["initial_sick"] = int(st.number_input("Sick people", min_value=0, max_value=simulation_params["population_size"], value=1, step=1))
-    simulation_params["number_of_frames"] = int(st.number_input("Steps", min_value=0, value=10))
+    simulation_params["population_size"] = int(st.number_input("Population", min_value=0, value=100, step=1))
+    simulation_params["initial_sick"] = int(st.number_input("Sick people", min_value=0, max_value=simulation_params["population_size"], value=10, step=1))
+    simulation_params["number_of_frames"] = int(st.number_input("Steps", min_value=0, value=50))
     simulation_params["contact_radius"] = st.slider("Contact range", min_value=0.0, max_value=1.0, value=0.03, step=0.01)
-    return simulation_params
-
-def get_person_params() -> Dict[str, Union[int, float]]:
     st.subheader("Person parameters")
     person_params: Dict[str, Union[int, float]] = dict()
     person_params["recovery_chance"] = st.number_input("Recovery Chance", min_value=0.0, max_value=1.0, step=0.01, value=0.03)
     person_params["immunity"] = int(st.number_input("Immunity", min_value=0, max_value=1, value=0, step=1))
     person_params["immunity_decrease_ratio"] = st.slider("Immunity decrease ratio", min_value=0.0, max_value=1.0, value=0.03)
-    return person_params
+    return simulation_params, person_params
+
 
 def plot_animation(df):
     chart = alt.Chart(df) \
         .mark_circle(size=60) \
         .encode(x='x', y='y', color='c') \
         .properties(title="Simulation",
-                    width=800, 
-                    height=800) \
+                    width=640, 
+                    height=480) \
         .interactive()
     return chart
+
+def plot_status(df):
+    lines = alt.Chart(df).mark_line().encode(
+       x=alt.X('Status:Q', axis=alt.Axis(title='Steps')),
+       y=alt.Y('Count:Q',axis=alt.Axis(title='Number of people'),
+       color="Status"),
+     ).properties(
+       width=600,
+       height=300
+     ) 
+    return lines
 
 
 class Animation:
@@ -39,10 +47,8 @@ class Animation:
     def __init__(self, simulation):
         self.simulation = simulation
         self.chart = st.empty()
-        self.frame_container= st.empty()
-        self.color_encoding = {(0, 1, 0): "healthy",
-                                (1, 0, 0): "sick",
-                                (0.7, 0, 0.7): "recovered"}
+        self.status = st.empty()
+        self.frame_container= st.empty()     
     
     def __call__(self, action):
         actions = {"start": self.start,
@@ -55,58 +61,52 @@ class Animation:
                     
     def start(self):
         st.session_state.frame_idx = 0
-        for i, frame in enumerate(self.simulation):
+        for i in range(self.simulation.number_of_frames+1):
             self.frame_container.write(st.session_state.frame_idx)
-            self.plot(frame)
+            self.chart.write(self.simulation.sim_animations[i])
+            self.status.write(self.simulation.status_animations[i])
+            time.sleep(0.2)
             if st.session_state["frame_idx"] < self.simulation.population_size:
                 st.session_state["frame_idx"] = st.session_state["frame_idx"] + 1
 
         
     def stop(self):
-        st.session_state["frame_idx"] = st.session_state["frame_idx"] - 1
+        #st.session_state["frame_idx"] = st.session_state["frame_idx"] - 1
         self.frame_container.write(st.session_state.frame_idx)
-        stopped_frame = self.simulation[st.session_state["frame_idx"]]
-        self.plot(stopped_frame)
-      
+        self.chart.write(self.simulation.sim_animations[st.session_state["frame_idx"]])
+        self.status.write(self.simulation.status_animations[st.session_state["frame_idx"]])
+        
     def next(self):
         st.session_state["frame_idx"] = st.session_state["frame_idx"] + 1
         self.frame_container.write(st.session_state.frame_idx)
-        st.progress(st.session_state["frame_idx"])
-        next_frame = self.simulation[st.session_state["frame_idx"]]
-        self.plot(next_frame)
-    
+        self.chart.write(self.simulation.sim_animations[st.session_state["frame_idx"]])
+        self.status.write(self.simulation.status_animations[st.session_state["frame_idx"]])
+        
     def previous(self):
         st.session_state["frame_idx"] = st.session_state["frame_idx"] - 1
         self.frame_container.write(st.session_state.frame_idx)
-        st.progress(st.session_state["frame_idx"])
-        previous_frame = self.simulation[st.session_state["frame_idx"]]
-        self.plot(previous_frame)
-        
+        self.chart.write(self.simulation.sim_animations[st.session_state["frame_idx"]])
+        self.status.write(self.simulation.status_animations[st.session_state["frame_idx"]])
+          
     def resume(self):
         for i in range(st.session_state["frame_idx"], self.simulation.population_size + 1):
             self.frame_container.write(st.session_state.frame_idx)
-            current_frame = self.simulation[i]
-            self.plot(current_frame)
+            self.chart.write(self.simulation.sim_animations[st.session_state["frame_idx"]])
+            self.status.write(self.simulation.status_animations[st.session_state["frame_idx"]])
             if st.session_state["frame_idx"] < self.simulation.population_size:
                 st.session_state["frame_idx"] = st.session_state["frame_idx"] + 1
+    
 
-
-    def plot(self, frame):
-        x, y, c = frame
-        df = pd.DataFrame({"x": x, "y": y, "c": c})
-        color_encoding = {(0, 1, 0): "healthy",
-                    (1, 0, 0): "sick",
-                    (0.7, 0, 0.7): "recovered"}
-        df["c"] = df["c"].apply(lambda x: color_encoding[x])
-        scatter_chart = plot_animation(df)
-        self.chart.write(scatter_chart)
         
 
-
-@st.experimental_memo   
+@st.experimental_memo(suppress_st_warning=True)   
 def create_simulation(simulation_params, person_kwargs):
     simulation = Simulation(**simulation_params, person_kwargs=person_kwargs)
     return simulation
+ 
+def create_animation(simulation):
+    animation = Animation(simulation)
+    return animation
 
 if __name__ == "__main__":
     st.title("Epidemic Simulation")
@@ -114,12 +114,12 @@ if __name__ == "__main__":
         st.session_state.frame_idx = 0
     
     st.header("Set parameters")
-    simulation_params = get_simulation_params()
-    person_kwargs = get_person_params()
+    simulation_params, person_kwargs, = get_simulation_params()
+
+
     simulation = create_simulation(simulation_params, person_kwargs)
-    animation = Animation(simulation)
-    
-    st.header("Simulation")  
+    animation = create_animation(simulation)
+            
     col1, col2, col3, col4, col5 = st.columns([0.25, 0.25, 0.25, 0.25, 0.1])
 
     

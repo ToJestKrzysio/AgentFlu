@@ -1,6 +1,6 @@
 import math
 import random
-
+from typing import Tuple
 
 class Person:
     x: float
@@ -8,7 +8,7 @@ class Person:
     sick: bool
     recovered: bool
     immunity: float
-    color: tuple[float, float, float]
+    color: Tuple[float, float, float]
 
     HEALTHY_COLOR = (0, 1, 0)
     SICK_COLOR = (1, 0, 0)
@@ -38,7 +38,7 @@ class Person:
         """ Get representation of a person health as a corresponding color. """
         return self.color
 
-    def get_position(self) -> tuple[float, float]:
+    def get_position(self) -> Tuple[float, float]:
         """ Return current person location. """
         return self.x, self.y
 
