@@ -18,5 +18,6 @@ To make a cell interactive add tag
 
 Run app
 ```bash
+pip install -e .
 streamlit run src/app.py
 ```
