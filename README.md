@@ -15,3 +15,8 @@ To make a cell interactive add tag
 ```jupyter
 %matplotlib widget
 ```
+
+Run app
+```bash
+streamlit run src/app.py
+```
