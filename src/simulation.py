@@ -18,21 +18,21 @@ class Simulation:
     frames: List[frame]
 
     def __init__(self, population_size: int, initial_sick: int = 1, number_of_frames: int = 30,
-                 person_kwargs: dict = None, contact_radius: float = 0.005):
+                 person_kwargs: dict = None, contact_radius: float = 0.5):
         person_kwargs = {} if person_kwargs is None else person_kwargs
         self.frames = []
         self.initial_sick = initial_sick
         self.population_size = population_size
         self.population = [Person(**person_kwargs) for x in range(population_size)]
-        self.contact_radius = contact_radius
+        self.contact_radius = contact_radius / 1000
         self.squared_contact_radius = self.contact_radius ** 2
         for idx in range(initial_sick):
             self.population[idx].get_sick()
         self.number_of_frames = number_of_frames
         self.generate_frames(number_of_frames)
         self.color_encoding = {(0, 1, 0): "healthy",
-                                (1, 0, 0): "sick",
-                                (0.7, 0, 0.7): "recovered"}
+                               (1, 0, 0): "sick",
+                               (0.7, 0, 0.7): "recovered"}
         self.status_animations = self.get_status_plots()
         self.sim_animations = [plot_animation(self.transform_sim(frame)) for frame in self]
         
@@ -58,7 +58,8 @@ class Simulation:
         """ Generates given number of frames of the simulation. """
         self.save_frame(*self.get_population_position())
         for frame in range(number_of_frames):
-            self.update_population()
+            for _ in range(10):
+                self.update_population()
             self.save_frame(*self.get_population_position())
 
     def update_population(self) -> None:

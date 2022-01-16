@@ -9,6 +9,11 @@ class Person:
     recovered: bool
     immunity: float
     color: Tuple[float, float, float]
+    mobility: float
+    mobility_min: float
+    mobility_max: float
+    incubation_period: int
+    infection_duration: int
 
     HEALTHY_COLOR = (0, 1, 0)
     SICK_COLOR = (1, 0, 0)
@@ -20,19 +25,24 @@ class Person:
         self.sick = False
         self.recovered = False
         self.color = type(self).HEALTHY_COLOR
-        self.mobility = random.random()
+        self.mobility_min = 0.1
+        self.mobility_max = 0.3
         self.recovery_chance = 0.03
         self.immunity = 0
         self.immunity_decrease_ratio = 0.03
         self.recovered_immunity = 1
+        self.incubation_period = 2
+        self.infection_duration = 0
         for key, value in kwargs.items():
             setattr(self, key, value)
+        self.mobility = random.uniform(self.mobility_min, self.mobility_max)
 
     def get_sick(self):
         """ Become sick, update corresponding fields. """
         self.sick = True
         self.color = type(self).SICK_COLOR
         self.immunity = 1
+        self.infection_duration = 0
 
     def get_color(self):
         """ Get representation of a person health as a corresponding color. """
@@ -46,11 +56,15 @@ class Person:
         """ Update status related to disease development. """
         if self.sick:
             self._attempt_recovery()
+            self.infection_duration += 1
         else:
             self._reduce_immunity()
+            self.infection_duration = 0
 
     def move(self):
         """ Move from previous position to a new one. """
+        if self.infection_duration >= self.incubation_period + 1:
+            return
         move_x, move_y = self._get_move_values()
         self.x += move_x
         self.y += move_y
@@ -65,7 +79,7 @@ class Person:
         return self.sick
 
     def get_infected(self) -> None:
-        if self.immunity < random.random():
+        if self.immunity <= random.random():
             self.get_sick()
 
     def _recover(self):
@@ -104,7 +118,7 @@ class Person:
 
     def _attempt_recovery(self) -> None:
         """ Checks if patient will recover at the given time step. """
-        if not self.sick:
+        if not self.sick or self.infection_duration <= self.incubation_period:
             return
         if random.random() < self.recovery_chance:
             self._recover()
