@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 
 from src.parameters import PersonParameters
 
@@ -11,7 +11,14 @@ def count_people(colors):
         "recovered": (counts[PersonParameters.RECOVERED_COLOR], PersonParameters.RECOVERED_COLOR),
     }
 
-
+def count_peeps(colors):
+    counts = Counter(colors)
+    peeps = defaultdict(int)
+    peeps["healthy"] = counts[PersonParameters.HEALTHY_COLOR]
+    peeps["sick"] = counts[PersonParameters.SICK_COLOR]
+    peeps["recovered"] = counts[PersonParameters.RECOVERED_COLOR]
+    return peeps
+    
 def get_population_health_status(colors):
     counts = Counter(colors)
     return (
